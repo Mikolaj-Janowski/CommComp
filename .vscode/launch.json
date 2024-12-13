@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "WebApplication",
+            "request": "launch",
+            "mainClass": "com.WebApplication",
+            "projectName": "demo"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Main<demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.Main",
+            "projectName": "demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

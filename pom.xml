@@ -7,6 +7,12 @@
   <groupId>com</groupId>
   <artifactId>CommComp</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.4.0</version>
+      <relativePath/>
+  </parent>
 
   <name>Communication Component</name>
   <url>http://www.example.com</url>
@@ -18,6 +24,12 @@
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -40,6 +52,11 @@
         <version>LATEST</version>
     </dependency>
     <dependency>
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client-jackson2</artifactId>
+        <version>1.43.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.oauth-client</groupId>
       <artifactId>google-oauth-client-jetty</artifactId>
       <version>1.33.1</version>
@@ -49,7 +66,31 @@
       <artifactId>google-api-services-gmail</artifactId>
       <version>v1-rev110-1.25.0</version>
     </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId> <!-- Optional for templating -->
+    </dependency>
+    <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>1.34.1</version>
+    </dependency>
+        <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
   </dependencies>
+
+  <repositories>
+      <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+      </repository>
+  </repositories>
 
   <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
