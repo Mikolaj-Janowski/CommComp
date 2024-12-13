@@ -13,11 +13,6 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/gmail")
 public class GmailController {
 
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard";
-    }
-
     @GetMapping("/send")
     public ResponseEntity<String> sendEmail(
             @RequestParam String recipient,
