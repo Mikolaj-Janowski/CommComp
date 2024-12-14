@@ -3,7 +3,6 @@ package com.controllers;
 import com.GmailService;
 import com.EmailSender;
 import com.EmailReader;
-import com.EmailHistory;
 import com.google.api.services.gmail.Gmail;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +27,16 @@ public class GmailController {
     }
 
     @GetMapping("/oauth2callback")
-    public ResponseEntity<String> handleCallback(
+    public ResponseEntity<Void> handleCallback(
             @RequestParam() String code,
             HttpSession session) {
         try {
             GmailService.exchangeAuthorizationCode(code, session);
-            return ResponseEntity.ok("Authorization successful!");
+            URI redirectUri = URI.create("/mailing.html"); // Redirect to mailing.html
+            return ResponseEntity.status(302).location(redirectUri).build(); 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Authorization failed: " + e.getMessage());
+            return ResponseEntity.status(500).build(); // Return error if authorization fails
         }
     }
 
@@ -65,20 +65,6 @@ public class GmailController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to fetch emails: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/history")
-    public ResponseEntity<String> getEmailHistory(
-            @RequestParam String historyId,
-            HttpSession session) {
-        try {
-            Gmail gmail = GmailService.getAuthenticatedGmailService(session);
-            EmailHistory.getEmailHistory(gmail, historyId);
-            return ResponseEntity.ok("Email history fetched. Check logs for details.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Failed to fetch email history: " + e.getMessage());
         }
     }
 }

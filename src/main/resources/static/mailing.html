@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Functions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gmail Functions</h1>
+        <form id="sendEmailForm">
+            <h2>Send Email</h2>
+            <input type="email" id="recipient" placeholder="Recipient Email" required>
+            <input type="text" id="subject" placeholder="Subject" required>
+            <textarea id="body" placeholder="Email Body" rows="5" required></textarea>
+            <button type="button" onclick="sendEmail()">Send Email</button>
+        </form>
+
+        <div class="actions">
+            <button onclick="readEmails()">Read Emails</button>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = '/gmail';
+
+        function sendEmail() {
+            const recipient = document.getElementById('recipient').value;
+            const subject = document.getElementById('subject').value;
+            const body = document.getElementById('body').value;
+
+            fetch(`${baseUrl}/send?recipient=${encodeURIComponent(recipient)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert('Error sending email: ' + error.message));
+        }
+
+        function readEmails() {
+            fetch(`${baseUrl}/read`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert('Error fetching emails: ' + error.message));
+        }
+    </script>
+</body>
+</html>

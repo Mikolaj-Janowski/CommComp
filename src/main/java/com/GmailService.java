@@ -39,7 +39,7 @@ public class GmailService {
     // Generate Authorization URL
     public static String getAuthorizationUrl() throws Exception {
         return initializeFlow().newAuthorizationUrl()
-                .setRedirectUri("http://localhost:8080/gmail/oauth2callback") // Change this for deployment
+                .setRedirectUri("http://localhost:8080/gmail/oauth2callback")
                 .build();
     }
 
