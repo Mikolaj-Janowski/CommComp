@@ -25,16 +25,58 @@
         button:hover {
             background-color: #45a049;
         }
+        #error {
+            color: red;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
-    <button onclick="authorizeUser()">Authorize Gmail</button>
+    <div id="content" style="display: none;">
+        <button onclick="authorizeUser()">Authorize Gmail</button>
+    </div>
+    <div id="error" style="display: none;">Unauthorized. Please log in through the app.</div>
 
     <script>
         const baseUrl = '/gmail';
+
+        // Fetch authorization confirmation from VueJS or C#
+        async function checkAuthorization() {
+            try {
+                const response = await fetch('/api/confirmauth', { method: 'GET' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authorized === true) {
+                        showContent();
+                    } else {
+                        showError();
+                    }
+                } else {
+                    showError();
+                }
+            } catch (err) {
+                console.error('Error checking authorization:', err);
+                showError();
+            }
+        }
+
         function authorizeUser() {
             window.location.href = `${baseUrl}/authorize`;
         }
+
+        function showContent() {
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showError() {
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        // Run authorization check on page load
+        checkAuthorization();
     </script>
 </body>
 </html>
