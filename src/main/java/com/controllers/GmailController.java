@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/gmail")
@@ -57,14 +58,14 @@ public class GmailController {
     }
 
     @GetMapping("/read")
-    public ResponseEntity<String> readEmails(HttpSession session) {
+    public ResponseEntity<List<EmailReader.Email>> readEmails(HttpSession session) {
         try {
             Gmail gmail = GmailService.getAuthenticatedGmailService(session);
-            EmailReader.readEmails(gmail);
-            return ResponseEntity.ok("Unread emails fetched. Check logs for details.");
+            List<EmailReader.Email> emails = EmailReader.readAppEmails(gmail);
+            return ResponseEntity.ok(emails); // Return JSON response
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Failed to fetch emails: " + e.getMessage());
+            return ResponseEntity.status(500).build();
         }
     }
 }

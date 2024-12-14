@@ -28,7 +28,7 @@ public class EmailSender {
         MimeMessage email = new MimeMessage(session);
         email.setFrom(new InternetAddress(from));
         email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
-        email.setSubject(subject);
+        email.setSubject("HACS: " + subject); // Add prefix
         email.setText(bodyText);
         return email;
     }
