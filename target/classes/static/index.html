@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorize Gmail</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #error {
+            color: #e74c3c;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HACS Communications Module</h1>
+        <div id="content" style="display: none;">
+            <p>Click the button below to authorize your Gmail account:</p>
+            <button onclick="authorizeUser()">Authorize Gmail</button>
+        </div>
+        <div id="error" style="display: none;">Unauthorized. Please log in through the app.</div>
+        <footer>
+            © 2025 HACS System | Secure and Efficient Communication
+        </footer>
+    </div>
+
+    <script>
+        const baseUrl = '/gmail';
+
+        // Fetch authorization confirmation from VueJS or C#
+        async function checkAuthorization() {
+            try {
+                const response = await fetch('/api/confirmauth', { method: 'GET' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authorized === true) {
+                        showContent();
+                    } else {
+                        showError();
+                    }
+                } else {
+                    showError();
+                }
+            } catch (err) {
+                console.error('Error checking authorization:', err);
+                showError();
+            }
+        }
+
+        function authorizeUser() {
+            window.location.href = `${baseUrl}/authorize`;
+        }
+
+        function showContent() {
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showError() {
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        // Run authorization check on page load
+        checkAuthorization();
+    </script>
+</body>
+</html>

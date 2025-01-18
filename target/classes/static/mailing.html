@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <title>Gmail Functions</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 32px;
+            letter-spacing: 1.5px;
+        }
+        .container, .chat-container, .emails {
+            max-width: 700px;
+            width: 90%;
+            margin: 20px auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            cursor: pointer;
+            margin-bottom: 0;
+            font-size: 24px;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        h2:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .section-content {
+            display: none;
+            padding: 10px;
+        }
+        input, button, textarea {
+            margin: 10px 0;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        input, textarea {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 128, 255, 0.7);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #messageArea {
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+        .emails ul {
+            list-style: none;
+            padding: 0;
+        }
+        .emails li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .emails li:hover {
+            background-color: #f1f1f1;
+        }
+        .email-body {
+            display: none;
+            margin-top: 5px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gmail Functions Module</h1>
+    
+    <div class="container">
+        <h2 onclick="toggleSection(this)">Send Email</h2>
+        <div class="section-content" id="sendEmailSection">
+            <form id="sendEmailForm">
+                <input type="email" id="recipient" placeholder="Recipient Email" required>
+                <input type="text" id="subject" placeholder="Subject" required>
+                <textarea id="body" placeholder="Email Body" rows="5" required></textarea>
+                <button type="button" onclick="sendEmail()">Send Email</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="chat-container">
+        <h2 onclick="toggleSection(this)">Chat</h2>
+        <div class="section-content" id="chatSection">
+            <div id="messageArea"></div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="chatSender" placeholder="Your name" style="flex: 1;">
+                <input type="text" id="chatMessage" placeholder="Type a message" style="flex: 3;">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="emails">
+        <h2 onclick="toggleSection(this)">Read Emails</h2>
+        <div class="section-content" id="readEmailsSection">
+            <div class="actions">
+                <button onclick="readEmails()">Fetch Emails</button>
+            </div>
+            <ul id="emailList">
+                <!-- Emails will be dynamically added here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = '/gmail';
+
+        function toggleSection(header) {
+            const section = header.nextElementSibling;
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function sendEmail() {
+            const recipient = document.getElementById('recipient').value;
+            const subject = document.getElementById('subject').value;
+            const body = document.getElementById('body').value;
+
+            fetch(`${baseUrl}/send?recipient=${encodeURIComponent(recipient)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                document.getElementById('recipient').value = '';
+                document.getElementById('subject').value = '';
+                document.getElementById('body').value = '';
+            })
+            .catch(error => alert('Error sending email: ' + error.message));
+        }
+
+        function readEmails() {
+            fetch(`${baseUrl}/read`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(emails => {
+                const emailList = document.getElementById('emailList');
+                emailList.innerHTML = '';
+                if (!Array.isArray(emails) || emails.length === 0) {
+                    emailList.innerHTML = '<li>No emails found.</li>';
+                    return;
+                }
+                emails.forEach(email => {
+                    const emailSubject = email.subject ? email.subject.replace('HACS:', '').trim() : '(No Subject)';
+                    const emailBody = email.body || '(No Content)';
+                    const li = document.createElement('li');
+                    const bodyDiv = document.createElement('div');
+                    bodyDiv.className = 'email-body';
+                    bodyDiv.textContent = emailBody;
+                    li.textContent = emailSubject;
+                    li.appendChild(bodyDiv);
+                    li.addEventListener('click', () => {
+                        bodyDiv.style.display = bodyDiv.style.display === 'none' ? 'block' : 'none';
+                    });
+                    emailList.appendChild(li);
+                });
+            })
+            .catch(error => alert('Error fetching emails: ' + error.message));
+        }
+
+        let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('/chat-websocket');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, () => {
+                stompClient.subscribe('/topic/messages', message => {
+                    showMessage(JSON.parse(message.body));
+                });
+            });
+        }
+
+        function sendMessage() {
+            const sender = document.getElementById('chatSender').value.trim();
+            const content = document.getElementById('chatMessage').value.trim();
+            if (sender && content) {
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({ sender, content }));
+                document.getElementById('chatMessage').value = '';
+            } else {
+                alert('Please enter your name and a message.');
+            }
+        }
+
+        function showMessage(message) {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = `${message.sender}: ${message.content}`;
+            messageArea.appendChild(messageDiv);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+
+        window.onload = connect;
+    </script>
+</body>
+</html>
