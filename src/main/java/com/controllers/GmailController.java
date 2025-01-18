@@ -68,4 +68,17 @@ public class GmailController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/userEmail")
+    public ResponseEntity<String> getUserEmail(HttpSession session) {
+        try {
+            Gmail gmail = GmailService.getAuthenticatedGmailService(session);
+            String userEmail = gmail.users().getProfile("me").execute().getEmailAddress();
+            return ResponseEntity.ok(userEmail);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to retrieve user email: " + e.getMessage());
+        }
+    }
+
 }

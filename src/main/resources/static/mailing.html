@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <title>Gmail Functions</title>
     <style>
-        body {
+         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
@@ -130,7 +130,6 @@
         <div class="section-content" id="chatSection">
             <div id="messageArea"></div>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="chatSender" placeholder="Your name" style="flex: 1;">
                 <input type="text" id="chatMessage" placeholder="Type a message" style="flex: 3;">
                 <button onclick="sendMessage()">Send</button>
             </div>
@@ -207,38 +206,82 @@
             .catch(error => alert('Error fetching emails: ' + error.message));
         }
 
+        let userEmail = null;
         let stompClient = null;
+
+        async function fetchUserEmail() {
+            // Fetch the authenticated user's email from the session
+            try {
+                const response = await fetch(`${baseUrl}/userEmail`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    userEmail = await response.text();
+                } else {
+                    alert('Failed to fetch user email.');
+                }
+            } catch (error) {
+                alert('Error fetching user email: ' + error.message);
+            }
+        }
+
+        function toggleSection(header) {
+            const section = header.nextElementSibling;
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
 
         function connect() {
             const socket = new SockJS('/chat-websocket');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, () => {
                 stompClient.subscribe('/topic/messages', message => {
-                    showMessage(JSON.parse(message.body));
+                    const msg = JSON.parse(message.body);
+                    showMessage(msg, msg.sender === userEmail);
                 });
             });
         }
 
         function sendMessage() {
-            const sender = document.getElementById('chatSender').value.trim();
             const content = document.getElementById('chatMessage').value.trim();
-            if (sender && content) {
-                stompClient.send('/app/sendMessage', {}, JSON.stringify({ sender, content }));
+            if (userEmail && content) {
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({ sender: userEmail, content }));
                 document.getElementById('chatMessage').value = '';
             } else {
-                alert('Please enter your name and a message.');
+                alert('Message cannot be sent. Ensure you are authenticated and message is not empty.');
             }
         }
 
-        function showMessage(message) {
+        function showMessage(message, isUser) {
             const messageArea = document.getElementById('messageArea');
+
+            // Remove any existing "Message sent successfully!" notifications
+            const existingConfirmation = document.querySelector('.message-confirmation');
+            if (existingConfirmation) {
+                existingConfirmation.remove();
+            }
+
             const messageDiv = document.createElement('div');
             messageDiv.textContent = `${message.sender}: ${message.content}`;
             messageArea.appendChild(messageDiv);
+
+            // Add confirmation for user messages
+            if (isUser) {
+                const confirmationDiv = document.createElement('div');
+                confirmationDiv.className = 'message-confirmation';
+                confirmationDiv.style.color = 'lightgreen';
+                confirmationDiv.style.fontSize = '12px';
+                confirmationDiv.textContent = 'Message sent successfully!';
+                messageArea.appendChild(confirmationDiv);
+            }
+
             messageArea.scrollTop = messageArea.scrollHeight;
         }
 
-        window.onload = connect;
+        window.onload = async () => {
+            await fetchUserEmail();
+            connect();
+        };
     </script>
 </body>
 </html>
